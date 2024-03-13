@@ -6,6 +6,7 @@ contract SimpleSwap {
   // phase 1
   TestERC20 public token0;
   TestERC20 public token1;
+  uint256 public constant k = 666666;
 
   // phase 2
   uint256 public totalSupply = 0;
@@ -25,7 +26,34 @@ contract SimpleSwap {
       // token 1 -> token 0
       token1.transferFrom(msg.sender, address(this), _amountIn);
       token0.transfer(msg.sender, _amountIn);
+    } else {
+      revert("Invalid token");
     }
+  }
+
+  function swapVersion2(address _tokenIn, uint256 _amountIn) public {
+    require(_amountIn > 0);
+    uint256 amountOut = getAmountOut(_amountIn);
+
+    if (_tokenIn == address(token0)) {
+      // token 0 -> token 1
+      amountOut = getAmountOut(_amountIn);
+      token0.transferFrom(msg.sender, address(this), _amountIn);
+      token1.transfer(msg.sender, amountOut);
+    } else if (_tokenIn == address(token1)) {
+      // token 1 -> token 0
+      amountOut = getAmountOut(_amountIn);
+      token1.transferFrom(msg.sender, address(this), _amountIn);
+      token0.transfer(msg.sender, amountOut);
+    } else {
+      revert("Invalid token");
+    }
+  }
+
+  function getAmountOut(uint256 _amountIn) public pure returns (uint256) {
+    require(_amountIn > 0);
+
+    return k / (_amountIn * _amountIn);
   }
 
   // phase 1
